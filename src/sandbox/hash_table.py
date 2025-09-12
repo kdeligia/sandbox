@@ -115,7 +115,7 @@ class OpenAddressingHashTable:
         """
         Called before inserting new keys to keep probes short.
         Prefer growth when load threshold would be exceeded by one addition;
-        otherwise clean if tombstones are high.
+        otherwise clean if the deleted sentinels are too many.
         """
         if self._size + 1 > self._resize_threshold:
             self._resize()
@@ -124,17 +124,18 @@ class OpenAddressingHashTable:
             self._rehash_clean()
 
     def _rehash_into(self, new_capacity: int) -> None:
-        """Rebuild into a fresh table of 'new_capacity', copying only real entries (no tombstones)."""
+        """Rebuild into a fresh table of 'new_capacity', copying only real entries."""
         new_capacity = self._next_pow2(max(8, new_capacity))
         new_table: list[object | _Entry] = [_EMPTY] * new_capacity
         new_mask = new_capacity - 1
 
         for slot in self._storage:
-            if isinstance(slot, _Entry):
-                idx = slot.h & new_mask
-                while new_table[idx] is not _EMPTY:
-                    idx = (idx + 1) & new_mask
-                new_table[idx] = slot
+            if not isinstance(slot, _Entry):
+                continue
+            idx = slot.h & new_mask
+            while new_table[idx] is not _EMPTY:
+                idx = (idx + 1) & new_mask
+            new_table[idx] = slot
 
         self._storage = new_table
         self._capacity = new_capacity

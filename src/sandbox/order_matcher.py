@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from itertools import count
 from datetime import datetime
 import logging
-from typing import List, Tuple
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,13 +20,13 @@ class Order:
 
 class Engine:
     def __init__(self):
-        self.bids: List[Tuple[float, int]] = []
-        self.asks: List[Tuple[float, int]] = []
+        self.bids: list[tuple[float, int]] = []
+        self.asks: list[tuple[float, int]] = []
 
         self._seq = count()
         self._next_order_id = count(1)
 
-        self.trades: List[dict] = []
+        self.trades: list[dict] = []
 
         self._by_seq: dict[int, Order] = {}
         self._by_id: dict[int, Order] = {}
